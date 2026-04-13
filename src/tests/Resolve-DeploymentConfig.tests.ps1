@@ -41,7 +41,7 @@ Describe "Resolve-DeploymentConfig" {
         # Create default deploymentconfig.jsonc file
         $script:defaultDeploymentConfigPath = Join-Path $testRoot "default.deploymentconfig.jsonc"
         $script:defaultDeploymentConfig = [ordered]@{
-            '$schema'         = "https://raw.githubusercontent.com/climpr/climpr-schemas/main/schemas/v1.0.0/bicep-deployment/deploymentconfig.json#"
+            '$schema'         = "https://raw.githubusercontent.com/open-climpr/schemas/main/schemas/v1.0.0/bicep-deployment/deploymentconfig.json#"
             'location'        = "westeurope"
             'azureCliVersion' = "latest"
             'bicepVersion'    = "latest"

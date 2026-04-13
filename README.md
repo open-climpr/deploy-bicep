@@ -113,7 +113,7 @@ When creating a `deploymentconfig.json` or `deploymentconfig.jsonc` file, you sh
 
 ```json
 {
-  "$schema": "https://raw.githubusercontent.com/climpr/climpr-schemas/refs/heads/main/schemas/v1.0.0/bicep-deployment/deploymentconfig.json#"
+  "$schema": "https://raw.githubusercontent.com/open-climpr/schemas/refs/heads/main/schemas/v1.0.0/bicep-deployment/deploymentconfig.json#"
 }
 ```
 
@@ -151,7 +151,7 @@ Example:
 
 ```json
 {
-  "$schema": "https://raw.githubusercontent.com/climpr/climpr-schemas/refs/heads/main/schemas/v1.0.0/bicep-deployment/deploymentconfig.json#",
+  "$schema": "https://raw.githubusercontent.com/open-climpr/schemas/refs/heads/main/schemas/v1.0.0/bicep-deployment/deploymentconfig.json#",
   "disabled": false,
   "triggers": {
     "schedule": {
@@ -202,7 +202,7 @@ Example:
 
 ```json
 {
-  "$schema": "https://raw.githubusercontent.com/climpr/climpr-schemas/refs/heads/main/schemas/v1.0.0/bicep-deployment/deploymentconfig.json#",
+  "$schema": "https://raw.githubusercontent.com/open-climpr/schemas/refs/heads/main/schemas/v1.0.0/bicep-deployment/deploymentconfig.json#",
   "type": "deploymentStack",
   "scope": "subscription",
   "name": "stackName",
@@ -233,7 +233,7 @@ Example:
 
 ```json
 {
-  "$schema": "https://raw.githubusercontent.com/climpr/climpr-schemas/refs/heads/main/schemas/v1.0.0/bicep-deployment/deploymentconfig.json#",
+  "$schema": "https://raw.githubusercontent.com/open-climpr/schemas/refs/heads/main/schemas/v1.0.0/bicep-deployment/deploymentconfig.json#",
   "type": "deploymentStack",
   "scope": "subscription",
   "name": "stackName",
@@ -271,7 +271,7 @@ steps:
 
   - name: Run Bicep deployments
     id: deploy-bicep
-    uses: climpr/deploy-bicep@v1
+    uses: open-climpr/deploy-bicep@v1
     with:
       deployment-file-path: <Path to .bicepparam file>
       what-if: "false"
@@ -321,14 +321,14 @@ jobs:
 
       - name: Get Bicep Deployments
         id: get-bicep-deployments
-        uses: climpr/get-bicep-deployments@v1
+        uses: open-climpr/get-bicep-deployments@v1
         with:
           deployments-root-directory: bicep-deployments
           pattern: sample-deployment
 
       - name: Run Bicep deployments
         id: deploy-bicep
-        uses: climpr/deploy-bicep@v1
+        uses: open-climpr/deploy-bicep@v1
         with:
           deployment-file-path: bicep-deployments/sample-deployment/prod.bicepparam
 ```
@@ -371,7 +371,7 @@ jobs:
 
       - name: Get Bicep Deployments
         id: get-bicep-deployments
-        uses: climpr/get-bicep-deployments@v1
+        uses: open-climpr/get-bicep-deployments@v1
         with:
           deployments-root-directory: bicep-deployments
           event-name: ${{ github.event_name }}
@@ -411,7 +411,7 @@ jobs:
 
       - name: Run Bicep deployments
         id: deploy-bicep
-        uses: climpr/deploy-bicep@v1
+        uses: open-climpr/deploy-bicep@v1
         with:
           deployment-file-path: ${{ matrix.DeploymentFile }}
           what-if: "false"

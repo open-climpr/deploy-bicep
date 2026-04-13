@@ -20,7 +20,7 @@ runs:
   using: composite
   steps:
     - name: Install PS Modules
-      uses: climpr/install-psmodules@v1
+      uses: open-climpr/install-psmodules@v1
       with:
         modules: Bicep
 
