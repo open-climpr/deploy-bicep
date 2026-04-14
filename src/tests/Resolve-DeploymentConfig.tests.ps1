@@ -2,6 +2,9 @@ BeforeAll {
     if ((Get-PSResourceRepository -Name PSGallery).Trusted -eq $false) {
         Set-PSResourceRepository -Name PSGallery -Trusted -Confirm:$false
     }
+    if (!(Get-PSResource -Name AzAuth -ErrorAction Ignore)) {
+        Install-PSResource -Name AzAuth
+    }
     if (!(Get-PSResource -Name Bicep -ErrorAction Ignore)) {
         Install-PSResource -Name Bicep
     }
