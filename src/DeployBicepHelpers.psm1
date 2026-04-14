@@ -486,8 +486,6 @@ function Resolve-TemplateDeploymentScope {
         #* Find cached template reference
         $cachePath = "~/.bicep/$type/$registryFqdn/$($modulePathElements -join "$")/$version`$/"
 
-        Write-Host "cachePath: $cachePath"
-
         if (!(Test-Path -Path $cachePath)) {
             #* Restore .bicep or .bicepparam file to ensure templates are located in the cache
             bicep restore $DeploymentFilePath
