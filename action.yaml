@@ -35,9 +35,7 @@ runs:
     - name: Install PS Modules
       uses: open-climpr/install-psmodules@v1
       with:
-        modules: |
-          AzAuth
-          Bicep
+        modules: Bicep
 
     - name: Resolve parameter
       id: get-input
