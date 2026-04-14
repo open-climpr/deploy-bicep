@@ -11,6 +11,19 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v5
 
+      - name: Update PowerShell if below 7.6.0
+        shell: bash
+        env:
+          TARGET_VERSION: 7.6.0
+        run: |
+          CURRENT_VERSION=$(pwsh -v | awk '{print $2}')
+          if [ "$(printf '%s\n%s' "$CURRENT_VERSION" "$TARGET_VERSION" | sort -V | head -n1)" != "$TARGET_VERSION" ]; then
+            echo "Current version ($CURRENT_VERSION) is lower than $TARGET_VERSION. Updating..."
+            sudo apt-get update -qq && sudo apt-get install -y --only-upgrade powershell
+          else
+            echo "PowerShell is up to date or newer ($CURRENT_VERSION)."
+          fi
+
       - name: Run Pester tests
         shell: pwsh
         run: Invoke-Pester -Output Detailed
