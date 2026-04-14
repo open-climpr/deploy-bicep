@@ -94,7 +94,7 @@ runs:
 
     - name: Bicep deployment
       id: bicep-deployment
-      uses: azure/CLI@v2
+      uses: azure/CLI@v3
       if: steps.resolve-deploymentconfig.outputs.deploy == 'true'
       env:
         AZURE_CLI_COMMAND: ${{ steps.resolve-deploymentconfig.outputs.azure-cli-command }}
@@ -259,7 +259,7 @@ runs:
     - name: PR comment for what-if deployment
       id: deployment-comment
       if: steps.resolve-deploymentconfig.outputs.type == 'deployment' && inputs.what-if == 'true'
-      uses: mshick/add-pr-comment@v2
+      uses: mshick/add-pr-comment@v3
       with:
         message-id: ${{ steps.resolve-deploymentconfig.outputs.deployment-id }}
         message-path: deployment.md

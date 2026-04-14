@@ -260,10 +260,10 @@ It is called as a step like this:
 # ...
 steps:
   - name: Checkout repository
-    uses: actions/checkout@v4
+    uses: actions/checkout@v6
 
   - name: Azure login via OIDC
-    uses: azure/login@v2
+    uses: azure/login@v3
     with:
       client-id: ${{ vars.APP_ID }}
       tenant-id: ${{ vars.TENANT_ID }}
@@ -310,10 +310,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Azure login via OIDC
-        uses: azure/login@v2
+        uses: azure/login@v3
         with:
           client-id: ${{ vars.APP_ID }}
           tenant-id: ${{ vars.TENANT_ID }}
@@ -367,7 +367,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Get Bicep Deployments
         id: get-bicep-deployments
@@ -400,10 +400,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Azure login via OIDC
-        uses: azure/login@v2
+        uses: azure/login@v3
         with:
           client-id: ${{ vars.APP_ID }}
           tenant-id: ${{ vars.TENANT_ID }}
