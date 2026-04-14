@@ -480,9 +480,6 @@ function Resolve-TemplateDeploymentScope {
             $modulePathElements = $modulePath -split "/"
         }
 
-        #* Remove empty elements
-        $modulePathElements = $modulePathElements | Where-Object { ![string]::IsNullOrEmpty($_) }
-
         #* Find cached template reference
         $cachePath = "~/.bicep/$type/$registryFqdn/$($modulePathElements -join "$")/$version`$/"
 
