@@ -174,6 +174,45 @@ function Remove-BicepComments {
 
     return $resultLines -join "`n"
 }
+
+function Get-BicepConfig {
+    param (
+        [Parameter(Mandatory)]
+        [string]
+        $Path
+    )
+
+    #* Bicep built-in default configuration (mirrors the defaults embedded in the Bicep CLI)
+    $builtInConfig = @{
+        moduleAliases = @{
+            br = @{
+                public = @{
+                    registry   = "mcr.microsoft.com"
+                    modulePath = "bicep"
+                }
+            }
+            ts = @{}
+        }
+    }
+
+    #* Resolve starting directory (accept both file and directory paths)
+    $item = Get-Item -Path $Path
+    $dir = $item.PSIsContainer ? $item : $item.Directory
+
+    #* Walk up the directory tree to find the nearest bicepconfig.json
+    while ($dir) {
+        $configPath = Join-Path -Path $dir.FullName -ChildPath "bicepconfig.json"
+        if (Test-Path -Path $configPath -PathType Leaf) {
+            Write-Debug "[Get-BicepConfig()] Found bicepconfig.json at: $configPath"
+            $userConfig = Get-Content -Path $configPath -Raw | ConvertFrom-Json -AsHashtable -NoEnumerate
+            return Join-HashTable -Hashtable1 $builtInConfig -Hashtable2 $userConfig
+        }
+        $dir = $dir.Parent
+    }
+
+    Write-Debug "[Get-BicepConfig()] No bicepconfig.json found. Returning built-in defaults."
+    return $builtInConfig
+}
 #endregion
 
 #region Configuration Management
@@ -462,7 +501,7 @@ function Resolve-TemplateDeploymentScope {
             #* Is alias
 
             #* Get active bicepconfig.json
-            $bicepConfig = Get-BicepConfig -Path $DeploymentFilePath | Select-Object -ExpandProperty Config | ConvertFrom-Json -AsHashtable -NoEnumerate
+            $bicepConfig = Get-BicepConfig -Path $DeploymentFilePath
             
             $type = $Matches[1]
             $alias = $Matches[2]

@@ -32,11 +32,6 @@ runs:
           echo "PowerShell is up to date or newer ($CURRENT_VERSION)."
         fi
 
-    - name: Install PS Modules
-      uses: open-climpr/install-psmodules@v1
-      with:
-        modules: Bicep
-
     - name: Resolve parameter
       id: get-input
       shell: pwsh
