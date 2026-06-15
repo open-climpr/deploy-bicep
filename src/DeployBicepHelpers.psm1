@@ -174,6 +174,44 @@ function Remove-BicepComments {
 
     return $resultLines -join "`n"
 }
+
+function Get-BicepModuleAliases {
+    param (
+        [Parameter(Mandatory)]
+        [string]
+        $Path
+    )
+
+    #* Bicep built-in default aliases (mirrors the defaults embedded in the Bicep CLI)
+    $builtInAliases = @{
+        br = @{
+            public = @{
+                registry   = "mcr.microsoft.com"
+                modulePath = "bicep"
+            }
+        }
+        ts = @{}
+    }
+
+    #* Resolve starting directory (accept both file and directory paths)
+    $item = Get-Item -Path $Path
+    $dir = $item.PSIsContainer ? $item : $item.Directory
+
+    #* Walk up the directory tree to find the nearest bicepconfig.json
+    while ($dir) {
+        $configPath = Join-Path -Path $dir.FullName -ChildPath "bicepconfig.json"
+        if (Test-Path -Path $configPath -PathType Leaf) {
+            Write-Debug "[Get-BicepModuleAliases()] Found bicepconfig.json at: $configPath"
+            $userConfig = Get-Content -Path $configPath -Raw | ConvertFrom-Json -AsHashtable -NoEnumerate
+            $userAliases = $userConfig.moduleAliases ?? @{}
+            return Join-HashTable -Hashtable1 $builtInAliases -Hashtable2 $userAliases
+        }
+        $dir = $dir.Parent
+    }
+
+    Write-Debug "[Get-BicepModuleAliases()] No bicepconfig.json found. Returning built-in defaults."
+    return $builtInAliases
+}
 #endregion
 
 #region Configuration Management
@@ -461,13 +499,13 @@ function Resolve-TemplateDeploymentScope {
         if ($referenceString -match "^(br|ts)\/(.+?):(.+?):(.+?)$") {
             #* Is alias
 
-            #* Get active bicepconfig.json
-            $bicepConfig = Get-BicepConfig -Path $DeploymentFilePath | Select-Object -ExpandProperty Config | ConvertFrom-Json -AsHashtable -NoEnumerate
+            #* Get active module aliases
+            $moduleAliases = Get-BicepModuleAliases -Path $DeploymentFilePath
             
             $type = $Matches[1]
             $alias = $Matches[2]
-            $registryFqdn = $bicepConfig.moduleAliases[$type][$alias].registry
-            $modulePath = $bicepConfig.moduleAliases[$type][$alias].modulePath
+            $registryFqdn = $moduleAliases[$type][$alias].registry
+            $modulePath = $moduleAliases[$type][$alias].modulePath
             $templateName = $Matches[3]
             $version = $Matches[4]
             $modulePathElements = $($modulePath -split "/"; $templateName -split "/")
