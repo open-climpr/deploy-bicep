@@ -26,7 +26,7 @@ BeforeAll {
     }
 }
 
-Describe "Get-BicepConfig" {
+Describe "Get-BicepModuleAliases" {
     BeforeEach {
         $script:testRoot = Join-Path $TestDrive 'mock'
         New-Item -Path $testRoot -ItemType Directory -Force | Out-Null
@@ -42,68 +42,68 @@ Describe "Get-BicepConfig" {
                 'main.bicep' = ""
             }
 
-            $result = Get-BicepConfig -Path "$testRoot/main.bicep"
+            $result = Get-BicepModuleAliases -Path "$testRoot/main.bicep"
 
             $result | Should -BeOfType Hashtable
-            $result.moduleAliases.br.public.registry | Should -BeExactly "mcr.microsoft.com"
-            $result.moduleAliases.br.public.modulePath | Should -BeExactly "bicep"
+            $result.br.public.registry | Should -BeExactly "mcr.microsoft.com"
+            $result.br.public.modulePath | Should -BeExactly "bicep"
         }
 
         It "Should return built-in defaults when called with a directory path and no bicepconfig.json exists" {
-            $result = Get-BicepConfig -Path $testRoot
+            $result = Get-BicepModuleAliases -Path $testRoot
 
-            $result.moduleAliases.br.public.registry | Should -BeExactly "mcr.microsoft.com"
+            $result.br.public.registry | Should -BeExactly "mcr.microsoft.com"
         }
     }
 
     Context "Config file discovery" {
         It "Should find bicepconfig.json in the same directory as the file" {
             New-FileStructure -Path $testRoot -Structure @{
-                'main.bicep'      = ""
-                'bicepconfig.json' = @{ analyzers = @{ core = @{ enabled = $true } } } | ConvertTo-Json -Depth 5
+                'main.bicep'       = ""
+                'bicepconfig.json' = @{ moduleAliases = @{ br = @{ custom = @{ registry = "custom.azurecr.io"; modulePath = "m" } } } } | ConvertTo-Json -Depth 5
             }
 
-            $result = Get-BicepConfig -Path "$testRoot/main.bicep"
+            $result = Get-BicepModuleAliases -Path "$testRoot/main.bicep"
 
-            $result.analyzers.core.enabled | Should -Be $true
+            $result.br.custom.registry | Should -BeExactly "custom.azurecr.io"
         }
 
         It "Should find bicepconfig.json in a parent directory" {
             New-FileStructure -Path $testRoot -Structure @{
-                'bicepconfig.json' = @{ analyzers = @{ core = @{ enabled = $true } } } | ConvertTo-Json -Depth 5
+                'bicepconfig.json' = @{ moduleAliases = @{ br = @{ custom = @{ registry = "custom.azurecr.io"; modulePath = "m" } } } } | ConvertTo-Json -Depth 5
                 'subdir'           = @{
                     'main.bicep' = ""
                 }
             }
 
-            $result = Get-BicepConfig -Path "$testRoot/subdir/main.bicep"
+            $result = Get-BicepModuleAliases -Path "$testRoot/subdir/main.bicep"
 
-            $result.analyzers.core.enabled | Should -Be $true
+            $result.br.custom.registry | Should -BeExactly "custom.azurecr.io"
         }
 
         It "Should find the nearest bicepconfig.json when multiple exist in parent directories" {
             New-FileStructure -Path $testRoot -Structure @{
-                'bicepconfig.json' = @{ customSetting = "parent" } | ConvertTo-Json
+                'bicepconfig.json' = @{ moduleAliases = @{ br = @{ custom = @{ registry = "parent.azurecr.io"; modulePath = "m" } } } } | ConvertTo-Json -Depth 5
                 'subdir'           = @{
-                    'bicepconfig.json' = @{ customSetting = "child" } | ConvertTo-Json
+                    'bicepconfig.json' = @{ moduleAliases = @{ br = @{ custom = @{ registry = "child.azurecr.io"; modulePath = "m" } } } } | ConvertTo-Json -Depth 5
                     'main.bicep'       = ""
                 }
             }
 
-            $result = Get-BicepConfig -Path "$testRoot/subdir/main.bicep"
+            $result = Get-BicepModuleAliases -Path "$testRoot/subdir/main.bicep"
 
-            $result.customSetting | Should -BeExactly "child"
+            $result.br.custom.registry | Should -BeExactly "child.azurecr.io"
         }
 
         It "Should accept a directory path as input" {
             New-FileStructure -Path $testRoot -Structure @{
-                'bicepconfig.json' = @{ customSetting = "from-dir" } | ConvertTo-Json
+                'bicepconfig.json' = @{ moduleAliases = @{ br = @{ custom = @{ registry = "custom.azurecr.io"; modulePath = "m" } } } } | ConvertTo-Json -Depth 5
                 'subdir'           = @{}
             }
 
-            $result = Get-BicepConfig -Path "$testRoot/subdir"
+            $result = Get-BicepModuleAliases -Path "$testRoot/subdir"
 
-            $result.customSetting | Should -BeExactly "from-dir"
+            $result.br.custom.registry | Should -BeExactly "custom.azurecr.io"
         }
     }
 
@@ -123,10 +123,10 @@ Describe "Get-BicepConfig" {
                 } | ConvertTo-Json -Depth 5
             }
 
-            $result = Get-BicepConfig -Path "$testRoot/main.bicep"
+            $result = Get-BicepModuleAliases -Path "$testRoot/main.bicep"
 
-            $result.moduleAliases.br.public.registry | Should -BeExactly "mcr.microsoft.com"
-            $result.moduleAliases.br.myRegistry.registry | Should -BeExactly "myregistry.azurecr.io"
+            $result.br.public.registry | Should -BeExactly "mcr.microsoft.com"
+            $result.br.myRegistry.registry | Should -BeExactly "myregistry.azurecr.io"
         }
 
         It "Should allow user config to override the built-in public alias" {
@@ -144,9 +144,9 @@ Describe "Get-BicepConfig" {
                 } | ConvertTo-Json -Depth 5
             }
 
-            $result = Get-BicepConfig -Path "$testRoot/main.bicep"
+            $result = Get-BicepModuleAliases -Path "$testRoot/main.bicep"
 
-            $result.moduleAliases.br.public.registry | Should -BeExactly "custom.azurecr.io"
+            $result.br.public.registry | Should -BeExactly "custom.azurecr.io"
         }
     }
 
@@ -162,7 +162,7 @@ Describe "Get-BicepConfig" {
                 }
             }
 
-            { Get-BicepConfig -Path "$testRoot/a/b/c/main.bicep" } | Should -Not -Throw
+            { Get-BicepModuleAliases -Path "$testRoot/a/b/c/main.bicep" } | Should -Not -Throw
         }
     }
 }

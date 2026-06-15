@@ -175,24 +175,22 @@ function Remove-BicepComments {
     return $resultLines -join "`n"
 }
 
-function Get-BicepConfig {
+function Get-BicepModuleAliases {
     param (
         [Parameter(Mandatory)]
         [string]
         $Path
     )
 
-    #* Bicep built-in default configuration (mirrors the defaults embedded in the Bicep CLI)
-    $builtInConfig = @{
-        moduleAliases = @{
-            br = @{
-                public = @{
-                    registry   = "mcr.microsoft.com"
-                    modulePath = "bicep"
-                }
+    #* Bicep built-in default aliases (mirrors the defaults embedded in the Bicep CLI)
+    $builtInAliases = @{
+        br = @{
+            public = @{
+                registry   = "mcr.microsoft.com"
+                modulePath = "bicep"
             }
-            ts = @{}
         }
+        ts = @{}
     }
 
     #* Resolve starting directory (accept both file and directory paths)
@@ -203,15 +201,16 @@ function Get-BicepConfig {
     while ($dir) {
         $configPath = Join-Path -Path $dir.FullName -ChildPath "bicepconfig.json"
         if (Test-Path -Path $configPath -PathType Leaf) {
-            Write-Debug "[Get-BicepConfig()] Found bicepconfig.json at: $configPath"
+            Write-Debug "[Get-BicepModuleAliases()] Found bicepconfig.json at: $configPath"
             $userConfig = Get-Content -Path $configPath -Raw | ConvertFrom-Json -AsHashtable -NoEnumerate
-            return Join-HashTable -Hashtable1 $builtInConfig -Hashtable2 $userConfig
+            $userAliases = $userConfig.moduleAliases ?? @{}
+            return Join-HashTable -Hashtable1 $builtInAliases -Hashtable2 $userAliases
         }
         $dir = $dir.Parent
     }
 
-    Write-Debug "[Get-BicepConfig()] No bicepconfig.json found. Returning built-in defaults."
-    return $builtInConfig
+    Write-Debug "[Get-BicepModuleAliases()] No bicepconfig.json found. Returning built-in defaults."
+    return $builtInAliases
 }
 #endregion
 
@@ -500,13 +499,13 @@ function Resolve-TemplateDeploymentScope {
         if ($referenceString -match "^(br|ts)\/(.+?):(.+?):(.+?)$") {
             #* Is alias
 
-            #* Get active bicepconfig.json
-            $bicepConfig = Get-BicepConfig -Path $DeploymentFilePath
+            #* Get active module aliases
+            $moduleAliases = Get-BicepModuleAliases -Path $DeploymentFilePath
             
             $type = $Matches[1]
             $alias = $Matches[2]
-            $registryFqdn = $bicepConfig.moduleAliases[$type][$alias].registry
-            $modulePath = $bicepConfig.moduleAliases[$type][$alias].modulePath
+            $registryFqdn = $moduleAliases[$type][$alias].registry
+            $modulePath = $moduleAliases[$type][$alias].modulePath
             $templateName = $Matches[3]
             $version = $Matches[4]
             $modulePathElements = $($modulePath -split "/"; $templateName -split "/")
